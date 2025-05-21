@@ -118,7 +118,7 @@ class MeasurementData:
             rotation_x = R.from_euler('x', rx, degrees=False).as_matrix()
             rotation_z = R.from_euler('z', rz, degrees=False).as_matrix()
             r_camera_to_robot = rotation_x @ rotation_z
-            t_camera_to_robot = np.array([[-0.04], [0.0], [-0.03]])
+            t_camera_to_robot = np.array([[-0.04], [0.0], [0.04]])
             
             cameraPosition =   (-np.matrix(r_world_to_camera).T @  np.matrix(tvec))+t_camera_to_robot
             r_world_to_robot =  r_world_to_camera @ r_camera_to_robot
@@ -213,48 +213,7 @@ class MeasurementData:
                     cv2.imshow('Image', image1)
                     cv2.waitKey(3*1000 )
                     cv2.destroyAllWindows()
-    # def rotation_matrix_x(self,angle):
-    #     """Creates a rotation matrix around the x-axis."""
-    #     c = np.cos(angle)
-    #     s = np.sin(angle)
-    #     return np.array([
-    #         [1, 0, 0, 0],
-    #         [0, c, -s, 0],
-    #         [0, s, c, 0],
-    #         [0, 0, 0, 1]
-    #     ])
-
-    # def rotation_matrix_y(self,angle):
-    #     """Creates a rotation matrix around the y-axis."""
-    #     c = np.cos(angle)
-    #     s = np.sin(angle)
-    #     return np.array([
-    #         [c, 0, s, 0],
-    #         [0, 1, 0, 0],
-    #         [-s, 0, c, 0],
-    #         [0, 0, 0, 1]
-    #     ])
-
-    # def rotation_matrix_z(self,angle):
-    #     """Creates a rotation matrix around the z-axis."""
-    #     c = np.cos(angle)
-    #     s = np.sin(angle)
-    #     return np.array([
-    #         [c, -s, 0, 0],
-    #         [s, c, 0, 0],
-    #         [0, 0, 1, 0],
-    #         [0, 0, 0, 1]
-    #     ])
-    # def apply_transform(self,transform, x):
-    #     '''
-    #     https://alexsm.com/homogeneous-transforms/
-    #     '''
-    #     x_h = np.ones((x.shape[0] + 1, x.shape[1]), dtype=x.dtype)
-    #     x_h[:-1, :] = x
-    #     x_t = np.dot(transform, x_h)
-    #     # return x_t[:3] / x_t[-1]
-    #     return x_t[:3]
-
+    
     '''
     def translation_matrix(self,tx, ty, tz):
         """Creates a translation matrix."""
@@ -417,6 +376,8 @@ class MeasurementData:
             min_idx = np.argmin(self.actual_vicon_np[-1,:] < x)
             if min_idx == 0:
                 continue
+            if min_idx == self.actual_vicon_np[-1,:].shape[0]-1:
+                min_idx = min_idx-1
             x_interpolated = self.interpolate(x,
                     self.actual_vicon_np[-1,min_idx],
                     self.actual_vicon_np[-1,min_idx+1],
@@ -454,8 +415,8 @@ class MeasurementData:
             
             self.actual_vicon_aligned_np = new_row if self.actual_vicon_aligned_np is None \
                 else np.vstack((self.actual_vicon_aligned_np,new_row))
-
-        self.diff_matrix = self.actual_vicon_aligned_np.T[0:6,:] - self.results_np.T.squeeze()[0:6,:] 
+        max_index = self.actual_vicon_aligned_np.shape[0]
+        self.diff_matrix = self.actual_vicon_aligned_np.T[0:6,:max_index] - self.results_np.T.squeeze()[0:6,:max_index] 
         temp_matrix = None
         for idx, row in enumerate(self.diff_matrix.T):
             v = np.matrix(row).T @ np.matrix(row)
@@ -652,8 +613,15 @@ def process_measurement_data(file_name):
 if __name__ == "__main__":
     # get_world_corners_test()
     # tests()
-    # process_measurement_data('studentdata0.mat')
+    process_measurement_data('studentdata0.mat')
+    process_measurement_data('studentdata1.mat')
+    process_measurement_data('studentdata2.mat')
+    process_measurement_data('studentdata3.mat')
+    process_measurement_data('studentdata4.mat')
     process_measurement_data('studentdata5.mat')
+    process_measurement_data('studentdata6.mat')
+    process_measurement_data('studentdata7.mat')
+    # process_measurement_data('studentdata5.mat')
     # process_measurement_data('studentdata5.mat')
     # process_measurement_data('studentdata2.mat')
     # process_measurement_data('studentdata3.mat')
